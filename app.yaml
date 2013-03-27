@@ -1,0 +1,13 @@
+application: 42btc-hackfisher
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /.*
+  script: ticker.app
+  
+libraries:
+- name: jinja2
+  version: latest
