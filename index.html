@@ -8,7 +8,7 @@
             
             onMessage = function(m) {
                 ticker = JSON.parse(m.data);
-                alert(ticker);
+                alert(m.data);
             }
 
             var channel = new goog.appengine.Channel('{{ token }}');

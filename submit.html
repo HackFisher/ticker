@@ -4,12 +4,12 @@
   </head>
   <body>
 	<div>Testing page:</div>
-    <form action="/send" method="post">
-      <div><label>当日累计交易量 , 单位为 买进货币</label><input type="text" name="amount_in"></div>
-	  <div><label>当日累计交易量 , 单位为 卖出货币</label><input type="text" name="amount_out"></div>
-	  <div><label>当前成交的价格</label><input type="text" name="current"></div>
-	  <div><label>当前买进的最高报价 (单位为 卖出货币)</label><input type="text" name="high"></div>
-	  <div><label>当前卖出的最低报价 (单位为 卖出货币)</label><input type="text" name="low"></div>
+    <form action="/submit" method="post">
+      <div><label>当日累计交易量 , 单位为 买进货币</label><input type="text" name="amount_in" value="100"></div>
+	  <div><label>当日累计交易量 , 单位为 卖出货币</label><input type="text" name="amount_out" value="10000"></div>
+	  <div><label>当前成交的价格</label><input type="text" name="current" value="50"></div>
+	  <div><label>当前买进的最高报价 (单位为 卖出货币)</label><input type="text" name="high" value="80"></div>
+	  <div><label>当前卖出的最低报价 (单位为 卖出货币)</label><input type="text" name="low" value="40"></div>
       <div><input type="submit" value="Submit"></div>
     </form>
   </body>
