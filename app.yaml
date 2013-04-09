@@ -5,6 +5,10 @@ api_version: 1
 threadsafe: true
 
 handlers:
+- url: /(.*\.(gif|png|jpg|css|js))
+  static_files: static/\1
+  upload: static/(.*\.(gif|png|jpg|css|js))
+
 - url: /.*
   script: ticker.app
   
@@ -14,3 +18,4 @@ libraries:
   
 inbound_services:
 - channel_presence
+

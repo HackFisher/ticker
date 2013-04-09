@@ -1,28 +1,52 @@
 ﻿<html>
   <head>
+    <script type="text/javascript" src="jquery-1.9.1.min.js"></script>
 	<script type="text/javascript" src="/_ah/channel/jsapi"></script>
-    <script>
+    <script type="text/javascript">
+        $(function () {
+            var token = '{{ token }}';
+            var heart_beat;
+
             onOpened = function() {
                 //sendMessage('/opened');
+
+                heart_beat = setInterval(function() {
+                    $.post('/heart', token);
+                }, 1000);
             };
             
             onMessage = function(m) {
                 ticker = JSON.parse(m.data);
+                if (ticker.error) {
+                    var error = ticker.error;
+                    if (error.code == 1) {
+                        // connection timeout
+                        // TODO: close the socket?
+                        alert(error.message);
+                    }
+                }
                 alert(m.data);
             }
 
-            var channel = new goog.appengine.Channel('{{ token }}');
+            onClose = function() {
+                clearInterval(heart_beat);
+            }
+
+            onError = function() {}
+
+            var channel = new goog.appengine.Channel(token);
             var handler = {
                 'onopen': onOpened,
                 'onmessage': onMessage,
-                'onerror': function() {},
-                'onclose': function() {}
+                'onerror': onError,
+                'onclose': onClose
             };
             var socket = channel.open(handler);
             socket.onopen = onOpened;
             socket.onmessage = onMessage;
             socket.onerror = onError;
             socket.onclose = onClose;
+   });
     </script>
   </head>
   <body>

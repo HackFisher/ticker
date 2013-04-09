@@ -11,9 +11,7 @@ import json
 
 from google.appengine.api import users
 from google.appengine.api import channel
-from sets import Set
-
-clients = Set()
+from google.appengine.api import memcache
 
 class MainPage(webapp2.RequestHandler):
     def get(self):
@@ -24,6 +22,14 @@ class MainPage(webapp2.RequestHandler):
             
         client_id = user.user_id() + str(int(round(time.time() * 1000)))
         token = channel.create_channel(client_id)
+
+        tokens = memcache.get("tokens") or {}
+
+        tokens[token] = {}
+        tokens[token]['id'] = client_id
+        tokens[token]['last_time'] = int(round(time.time() * 1000))
+
+        memcache.set("tokens", tokens)
 
         template_values = {'token': token,
             'me': user.user_id(),
@@ -58,22 +64,34 @@ class SubmitPage(webapp2.RequestHandler):
         }
         ticker_str = json.dumps(ticker)
 
-        for client_id in clients:
-            channel.send_message(client_id, ticker_str)
+        tokens = memcache.get('tokens')
+        if tokens:
+            for token, v in token.iteritems():
+                channel.send_message(v.id, ticker_str)
+
+class HeartBeat(webapp2.RequestHandler):
+    """Client will send heartbeat every 1000ms after connected to server"""
+    def post(self):
+        current_time = int(round(time.time() * 1000))
+        token = self.request.get('token')
+
+        tokens = memcache.get('tokens')
+        if tokens:
+            v = tokens.get(token, {})
+            if v:
+                v.last_time = current_time
             
 class Connected(webapp2.RequestHandler):
     """Post to this means that the client has connected to this channel and can receive message"""
     def post(self):
         client_id = self.request.get('from')
         print client_id + "connected"
-        clients.add(client_id)
 
 class Disconnected(webapp2.RequestHandler):
     """Post to this means that the client has disconnected from the channel."""
     def post(self):
         client_id = self.request.get('from')
         print client_id + "disconnected"
-        clients.remove(client_id)
             
-app = webapp2.WSGIApplication([('/', MainPage), ('/submit', SubmitPage), ('/_ah/channel/connected/', Connected), ('/_ah/channel/disconnected/', Disconnected)],
+app = webapp2.WSGIApplication([('/', MainPage), ('/submit', SubmitPage), ('/_ah/channel/connected/', Connected), ('/_ah/channel/disconnected/', Disconnected), ('/heart', HeartBeat)],
                               debug=True)
